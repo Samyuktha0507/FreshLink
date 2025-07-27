@@ -1,0 +1,12 @@
+{
+  "deployments": [
+    {
+      "name": "FreshLink",
+      "rootDirectory": "backend",
+      "build": {
+        "builder": "NIXPACKS"
+      },
+      "startCommand": "npm start"
+    }
+  ]
+}
