@@ -82,36 +82,43 @@
   color: #888;
 }
 
-.chatBody {
+.chatMessages {
   flex-grow: 1;
   padding: 1rem;
-  background-color: #fff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: #f9fafb;
 }
 
-.botMessage {
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-start;
+.message {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  word-wrap: break-word;
+  line-height: 1.4;
 }
 
-.botAvatarSmall {
-    background-color: var(--primary-yellow);
-    color: #fff;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+.message.bot {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  align-self: flex-start;
+  border-bottom-left-radius: 0.25rem;
 }
 
-.botMessage p {
-    background-color: #f1f1f1;
-    padding: 0.75rem;
-    border-radius: 0 15px 15px 15px;
-    margin: 0;
-    max-width: 80%;
+.message.user {
+  background-color: var(--primary-green);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.loadingIndicator {
+  align-self: center;
+  padding: 10px;
+  color: #6b7280;
+  font-style: italic;
 }
 
 .chatFooter {
@@ -128,13 +135,13 @@
   background-color: #f7f7f7;
   padding: 0.75rem;
   border-radius: 20px;
+  margin: 0 0.5rem;
 }
 
 .micIcon {
-    font-size: 1.5rem;
-    color: #888;
-    margin-right: 0.5rem;
-    cursor: pointer;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
 }
 
 .sendBtn {
@@ -149,5 +156,4 @@
   justify-content: center;
   font-size: 1.2rem;
   cursor: pointer;
-  margin-left: 0.5rem;
 }

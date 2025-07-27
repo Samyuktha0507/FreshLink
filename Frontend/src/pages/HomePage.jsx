@@ -24,7 +24,7 @@ const HomePage = () => {
         </nav>
         <main className={styles.mainContent}>
           <h1>
-            Fresh Produce, <span className={styles.highlight}>Direct to You</span>
+            Connect. Trade. <span className={styles.highlight}>Grow</span>
           </h1>
           <p>
             Connect food stall vendors with wholesale producers. Get fresh
@@ -35,7 +35,6 @@ const HomePage = () => {
               <FaStore className={styles.icon} />
               <h3>I'm a Vendor</h3>
               <p>Buy wholesale produce for my food stall</p>
-              {/* This now links to the login page for vendors */}
               <Link to="/login/vendor">
                 <button className={`${styles.btn} ${styles.vendorBtn}`}>
                   Join as Vendor
@@ -46,7 +45,6 @@ const HomePage = () => {
               <FaLeaf className={styles.icon} />
               <h3>I'm a Producer</h3>
               <p>Sell my produce to food vendors</p>
-              {/* This now links to the login page for producers */}
               <Link to="/login/producer">
                 <button className={`${styles.btn} ${styles.producerBtn}`}>
                   Join as Producer
@@ -69,15 +67,15 @@ const HomePage = () => {
 
       {/* About Us Section */}
       <section id="about" className={styles.infoSection}>
-        <h2 className={styles.sectionTitle}>🌱 About Us – FreshLink</h2>
+        <h2 className={styles.sectionTitle}>🌱 About Us – Freshlink</h2>
         <p className={styles.sectionText}>
-          At FreshLink, we believe that every great meal begins with a trusted connection.
+          At Freshlink, we believe that every great meal begins with a trusted connection.
         </p>
         <p className={styles.sectionText}>
           We’re a purpose-driven platform built to empower local street food vendors by connecting them directly with reliable producers and wholesale suppliers — no middlemen, no inflated prices, just fresh, traceable produce at fair rates.
         </p>
         <p className={styles.sectionText}>
-          Designed with the unique needs of small-scale food stall owners in mind, FreshLink makes it easier than ever to source raw materials transparently, make informed purchasing decisions, and manage operations with simplicity.
+          Designed with the unique needs of small-scale food stall owners in mind, Freshlink makes it easier than ever to source raw materials transparently, make informed purchasing decisions, and manage operations with simplicity.
         </p>
         <p className={styles.sectionText}>
           Whether you’re frying samosas on a bustling street corner or grilling kebabs for a midnight crowd — we’ve got your back with timely delivery options, AI-powered assistance, and role-based dashboards that put everything you need at your fingertips.
@@ -90,7 +88,8 @@ const HomePage = () => {
 
       {/* Features Section */}
       <section id="features" className={`${styles.infoSection} ${styles.featuresSection}`}>
-        <h2 className={styles.sectionTitle}>🔧 Features – What FreshLink Offers</h2>
+        <h2 className={styles.sectionTitle}>🔧 Features – What Freshlink Offers</h2>
+        <h3 className={styles.subHeader}>🛒 For Vendors (Customers)</h3>
         <div className={styles.featuresGrid}>
           <div className={styles.featureItem}>
             <FaShoppingCart className={styles.featureIcon} />
@@ -130,11 +129,11 @@ const HomePage = () => {
             </div>
             <div className={styles.contactItem}>
                 <FaEnvelope />
-                <a href="mailto:FreshLink@blablah.com">FreshLink@blablah.com</a>
+                <a href="mailto:Freshlink@blablah.com">Freshlink@blablah.com</a>
             </div>
         </div>
         <div className={styles.footerText}>
-            © 2025 FreshLink. All Rights Reserved.
+            © 2025 Freshlink. All Rights Reserved.
         </div>
       </footer>
     </div>

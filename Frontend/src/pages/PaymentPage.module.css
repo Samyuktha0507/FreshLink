@@ -1,0 +1,27 @@
+/* src/pages/PaymentPage.module.css */
+.page { background-color: #f9f9f9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.container { width: 100%; max-width: 800px; }
+.paymentLayout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; background-color: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.paymentOptions h2 { margin-top: 0; }
+.optionCard { display: flex; align-items: center; gap: 1rem; border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; }
+.optionCard:hover { border-color: var(--primary-green); }
+.optionCard.selected { border-color: var(--primary-green); box-shadow: 0 0 0 2px var(--primary-green); }
+.optionCard svg { font-size: 1.5rem; color: var(--primary-green); }
+.optionCard h4 { margin: 0 0 0.25rem; }
+.optionCard p { margin: 0; font-size: 0.9rem; color: #666; }
+.detailsSection { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+.detailsSection h4 { margin-top: 0; margin-bottom: 1rem; }
+.inputGroup { position: relative; display: flex; align-items: center; margin-bottom: 1rem; }
+.inputGroup svg { position: absolute; left: 15px; color: #aaa; }
+.inputGroup input { width: 100%; padding: 1rem 1rem 1rem 2.5rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
+.formRow { display: flex; gap: 1rem; }
+.payBtn { width: 100%; background-color: var(--primary-green); color: #fff; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; transition: background-color 0.2s; }
+.payBtn:disabled { background-color: #ccc; cursor: not-allowed; }
+.summary { background-color: #f4f7f6; padding: 1.5rem; border-radius: 10px; }
+.summary h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+.summaryItem, .summaryRow { display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: #666; }
+.summaryTotal { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem; }
+.successMessage { text-align: center; padding: 2rem; background-color: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.successIcon { font-size: 4rem; color: var(--primary-green); margin-bottom: 1rem; }
+.successMessage h2 { margin-bottom: 0.5rem; }
+.successMessage p { color: #666; margin-bottom: 2rem; }

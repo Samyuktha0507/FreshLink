@@ -15,60 +15,21 @@
 .productCard { background-color: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
 .productCard:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 .productImage { width: 100%; height: 150px; object-fit: cover; }
-.productCard h3 { font-size: 1.1rem; margin: 1rem 1rem 0.5rem; }
-.productPrice { font-size: 1.2rem; font-weight: bold; color: var(--primary-green); margin: 0 1rem 1rem; }
+.productDetails { padding: 1rem; flex-grow: 1; }
+.companyName { font-size: 0.8rem; color: #888; font-weight: 500; }
+.productDetails h3 { font-size: 1.1rem; margin: 0.25rem 0; }
+.productStock { font-size: 0.9rem; color: #666; margin: 0.5rem 0; }
+.productPrice { font-size: 1.2rem; font-weight: bold; color: var(--primary-green); }
 .addToCartBtn { background-color: var(--primary-yellow); color: var(--dark-blue); border: none; padding: 0.8rem; margin: 0 1rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-
-/* Notification Styles */
-.notification {
-  position: fixed;
-  top: 80px; /* Below header */
-  right: 2rem;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  z-index: 2000;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.notificationIcon {
-  color: var(--primary-green);
-  font-size: 1.5rem;
-  margin-right: 1rem;
-}
-
-.notificationImg {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 1rem;
-}
-
-.notificationText strong {
-  display: block;
-}
-
-.notificationText p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.notificationBtn {
-  background-color: #f0f0f0;
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  margin-left: 1.5rem;
-  font-weight: bold;
-  white-space: nowrap;
-}
+.addToCartBtn:disabled { background-color: #e0e0e0; cursor: not-allowed; }
+.quantitySelector { display: flex; align-items: center; justify-content: space-between; margin: 0 1rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; }
+.quantitySelector button { background: none; border: none; font-size: 1.2rem; padding: 0.8rem; cursor: pointer; color: var(--primary-green); }
+.quantitySelector button:disabled { color: #ccc; cursor: not-allowed; }
+.quantitySelector span { font-weight: bold; font-size: 1.1rem; }
+.notification { position: fixed; top: 80px; right: 2rem; background-color: #fff; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); display: flex; align-items: center; padding: 1rem; z-index: 2000; animation: slideIn 0.3s ease-out; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.notificationIcon { color: var(--primary-green); font-size: 1.5rem; margin-right: 1rem; }
+.notificationImg { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 1rem; }
+.notificationText strong { display: block; }
+.notificationText p { margin: 0; color: #666; font-size: 0.9rem; }
+.notificationBtn { background-color: #f0f0f0; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; margin-left: 1.5rem; font-weight: bold; white-space: nowrap; }
