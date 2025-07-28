@@ -16,7 +16,7 @@ connectDB();
 
 // --- CORS Configuration Start ---
 // IMPORTANT: Replace this with your actual Vercel frontend URL
-const frontendURL = "https://your-frontend-app.vercel.app"; 
+const frontendURL = "https://fresh-link-00001.vercel.app/"; 
 
 const corsOptions = {
   origin: frontendURL,
