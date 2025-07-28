@@ -6,7 +6,7 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 
 // --- IMPORTANT: Vercel Frontend URL ---
 // Define the base URL without a trailing slash
-const allowedFrontendOrigin = "https://fresh-link-00001.vercel.app/login/producer";
+const allowedFrontendOrigin = "https://fresh-link-00001.vercel.app";
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   console.error('❌ FATAL ERROR: MONGO_URI or JWT_SECRET is not defined in .env file');
