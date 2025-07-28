@@ -35,7 +35,8 @@ const HomePage = () => {
               <FaStore className={styles.icon} />
               <h3>I'm a Vendor</h3>
               <p>Buy wholesale produce for my food stall</p>
-              <Link to="/login/FreshLink">
+              {/* FIX: Change link to pass 'vendor' as the role parameter */}
+              <Link to="/login/vendor">
                 <button className={`${styles.btn} ${styles.vendorBtn}`}>
                   Join as Vendor
                 </button>
@@ -132,7 +133,7 @@ const HomePage = () => {
             </div>
         </div>
         <div className={styles.footerText}>
-            © 2025 FreshLink. All Rights Reserved.
+          © 2025 FreshLink. All Rights Reserved.
         </div>
       </footer>
     </div>
