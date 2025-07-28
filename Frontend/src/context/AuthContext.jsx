@@ -1,9 +1,14 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
-// Create a central axios instance
+// Get the base URL from the Vercel Environment Variable
+// This will be 'https://your-backend-app.onrender.com' in production
+// and potentially 'http://localhost:5000' in local development (if set in .env.local)
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Create a central axios instance using the environment variable
 const api = axios.create({
-  baseURL: 'https://freshlink-g6tl.onrender.com', // Your backend server URL
+  baseURL: API_BASE_URL,
 });
 
 const AuthContext = createContext(null);
@@ -25,7 +30,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await api.post('/users/login', { email, password });
+    // API call for user login
+    const response = await api.post('/api/users/login', { email, password }); // Assuming /api/users/login endpoint
     if (response.data) {
       localStorage.setItem('user', JSON.stringify(response.data));
       setUser(response.data);
@@ -35,7 +41,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const response = await api.post('/users/register', userData);
+    // API call for user registration
+    const response = await api.post('/api/users/register', userData); // Assuming /api/users/register endpoint
     if (response.data) {
       localStorage.setItem('user', JSON.stringify(response.data));
       setUser(response.data);
