@@ -5,9 +5,8 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 // --- IMPORTANT: Vercel Frontend URL ---
-// Allow both versions of the URL (with and without trailing slash)
-const frontendURL_noSlash = "https://fresh-link-00001.vercel.app";
-const frontendURL_withSlash = "https://fresh-link-00001.vercel.app/";
+// Define the base URL without a trailing slash
+const allowedFrontendOrigin = "https://fresh-link-00001.vercel.app";
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   console.error('❌ FATAL ERROR: MONGO_URI or JWT_SECRET is not defined in .env file');
@@ -21,7 +20,17 @@ connectDB();
 
 // --- CORS Configuration ---
 const corsOptions = {
-  origin: [frontendURL_noSlash, frontendURL_withSlash], // Allow both exact origins
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Check if the origin matches either the URL with or without a trailing slash
+    if (origin === allowedFrontendOrigin || origin === allowedFrontendOrigin + '/') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
