@@ -5,9 +5,9 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 // --- IMPORTANT: Vercel Frontend URL ---
-// You must replace this with the EXACT URL your Vercel frontend is deployed at.
-// Using the primary Vercel domain as requested:
-const frontendURL = "https://fresh-link-00001.vercel.app"; 
+// Allow both versions of the URL (with and without trailing slash)
+const frontendURL_noSlash = "https://fresh-link-00001.vercel.app";
+const frontendURL_withSlash = "https://fresh-link-00001.vercel.app/";
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   console.error('❌ FATAL ERROR: MONGO_URI or JWT_SECRET is not defined in .env file');
@@ -21,7 +21,7 @@ connectDB();
 
 // --- CORS Configuration ---
 const corsOptions = {
-  origin: frontendURL,
+  origin: [frontendURL_noSlash, frontendURL_withSlash], // Allow both exact origins
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
