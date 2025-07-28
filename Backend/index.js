@@ -14,14 +14,26 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-app.use(cors());
+// --- CORS Configuration Start ---
+// IMPORTANT: Replace this with your actual Vercel frontend URL
+const frontendURL = "https://your-frontend-app.vercel.app"; 
+
+const corsOptions = {
+  origin: frontendURL,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+// --- CORS Configuration End ---
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // API Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes'));
-app.use('/api/delivery', require('./routes/deliveryRoutes')); // Add the delivery route
+app.use('/api/delivery', require('./routes/deliveryRoutes'));
 
 app.get('/', (req, res) => {
   res.send('🚀 FreshLink Backend Running!');
