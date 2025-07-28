@@ -45,7 +45,7 @@ const Chatbot = () => {
     `;
 
     // --- The Fix: Call our own backend instead of Google's API ---
-    const backendApiUrl = 'http://localhost:5000/api/chatbot/query';
+    const backendApiUrl = 'https://freshlink-g6tl.onrender.com';
 
     try {
         const response = await fetch(backendApiUrl, {
