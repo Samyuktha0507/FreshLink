@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create a central axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Your backend server URL
+  baseURL: 'https://freshlink-g6tl.onrender.com', // Your backend server URL
 });
 
 const AuthContext = createContext(null);
