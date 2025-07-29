@@ -5,8 +5,31 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FreshLink</title>
+    <!-- Tailwind CSS CDN for quick setup -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Optional: Configure Tailwind if needed, e.g., for custom colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary-green': '#5a8a58',
+              'light-green': '#eaf5e9',
+              'primary-yellow': '#f9c74f',
+              'dark-blue': '#0c2340',
+              'text-color': '#333',
+              'background-color': '#ffffff',
+              'border-color': '#e0e0e0',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'], // Use Inter as default font
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body>
+  <body class="font-sans bg-background-color text-text-color antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
