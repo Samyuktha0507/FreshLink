@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './DashboardPage.module.css';
+import styles from './DashboardPage.module.css'; // Retained
 import { FiPlus, FiEdit, FiBarChart2, FiArrowLeft, FiX, FiTrash2 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useProducts } from '../context/ProductContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx'; // Import useAuth to get current user's ID
 
+// Dummy sales data for the chart
 const salesData = [
   { name: 'Jan', sales: 4000 }, { name: 'Feb', sales: 3000 }, { name: 'Mar', sales: 5000 },
   { name: 'Apr', sales: 4500 }, { name: 'May', sales: 6000 }, { name: 'Jun', sales: 5500 },
 ];
 
 const DashboardPage = () => {
-  const { products, deleteProduct } = useProducts();
+  const { user } = useAuth(); // Get the logged-in user
+  const { products, deleteProduct, loading, error } = useProducts(); // Get products, deleteProduct, loading, error from context
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  // Filter products to show only those belonging to the logged-in producer
+  // Ensure user is not null before filtering
+  const producerProducts = products.filter(p => p.user === user?._id); // Use user?._id for filtering
 
   const openModal = (product = null) => {
     setEditingProduct(product);
@@ -26,71 +33,171 @@ const DashboardPage = () => {
   };
 
   const handleDelete = (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-        deleteProduct(productId);
+    // Replace window.confirm with a custom modal/dialog for better UX
+    if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+        deleteProduct(productId); // Pass the product's _id
     }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-xl text-gray-600">Loading producer dashboard...</div>;
   }
 
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center text-xl text-red-600">Error: {error}</div>;
+  }
+
+  // If user is not a producer or not logged in, redirect or show message
+  if (!user || user.role !== 'producer') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-xl text-gray-600 p-4">
+        <p className="mb-4">Access Denied. You must be logged in as a Producer to view this dashboard.</p>
+        <Link to="/login/producer" className="text-primary-green hover:underline">Go to Producer Login</Link>
+      </div>
+    );
+  }
+
+
   return (
-    <div className={styles.dashboard}>
-      <header className={styles.header}>
-        <div className={styles.logo}>🌿 FreshLink Producer Dashboard</div>
-        <Link to="/" className={styles.backLink}><FiArrowLeft /> Back to Home</Link>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8 font-sans">
+      <header className="flex justify-between items-center bg-white p-4 rounded-xl shadow-md mb-6">
+        <div className="text-xl sm:text-2xl font-bold text-primary-green">
+          🌿 FreshLink Producer Dashboard
+        </div>
+        <Link to="/" className="text-gray-600 hover:text-primary-green flex items-center gap-1 transition-colors">
+          <FiArrowLeft /> Back to Home
+        </Link>
       </header>
-      <main className={styles.mainContent}>
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2>My Products</h2>
-            <button className={styles.primaryBtn} onClick={() => openModal()}><FiPlus /> Add New Product</button>
+
+      <main className="max-w-6xl mx-auto space-y-6">
+        {/* My Products Section */}
+        <section className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">My Products</h2>
+            <button
+              className="px-4 py-2 bg-primary-green text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors flex items-center gap-2"
+              onClick={() => openModal()}
+            >
+              <FiPlus /> Add New Product
+            </button>
           </div>
-          <div className={styles.tableContainer}>
-            <table className={styles.productTable}>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border-collapse">
               <thead>
-                <tr><th>Product</th><th>Company</th><th>Category</th><th>Stock (kg)</th><th>Price (₹)</th><th>Actions</th></tr>
+                <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                  <th className="py-3 px-6 text-left">Product</th>
+                  <th className="py-3 px-6 text-left">Company</th>
+                  <th className="py-3 px-6 text-left">Category</th>
+                  <th className="py-3 px-6 text-left">Stock (kg)</th>
+                  <th className="py-3 px-6 text-left">Price (₹)</th>
+                  <th className="py-3 px-6 text-center">Actions</th>
+                </tr>
               </thead>
-              <tbody>
-                {products.map(product => (
-                  <tr key={product.id}>
-                    <td className={styles.productCell}><img src={product.image} alt={product.name} className={styles.productImg}/>{product.name}</td>
-                    <td>{product.companyName}</td>
-                    <td>{product.category}</td>
-                    <td>{product.stock}</td>
-                    <td>{product.price.toFixed(2)}</td>
-                    <td className={styles.actionsCell}>
-                      <button className={styles.iconBtn} onClick={() => openModal(product)}><FiEdit /></button>
-                      <button className={`${styles.iconBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(product.id)}><FiTrash2 /></button>
+              <tbody className="text-gray-700 text-sm font-light">
+                {producerProducts.length > 0 ? (
+                  producerProducts.map(product => (
+                    <tr key={product._id} className="border-b border-gray-200 hover:bg-gray-50">
+                      <td className="py-3 px-6 text-left whitespace-nowrap">
+                        <div className="flex items-center">
+                          <img
+                            src={product.image || 'https://placehold.co/40x40/E0E0E0/333333?text=NoImg'}
+                            alt={product.name}
+                            className="w-10 h-10 rounded-md mr-3 object-cover"
+                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/E0E0E0/333333?text=NoImg'; }}
+                          />
+                          <span>{product.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-6 text-left">{product.companyName || 'N/A'}</td>
+                      <td className="py-3 px-6 text-left">{product.category || 'N/A'}</td>
+                      <td className="py-3 px-6 text-left">{product.stock !== undefined ? product.stock : 'N/A'}</td>
+                      <td className="py-3 px-6 text-left">₹{product.price !== undefined ? product.price.toFixed(2) : 'N/A'}</td>
+                      <td className="py-3 px-6 text-center">
+                        <div className="flex item-center justify-center space-x-2">
+                          <button
+                            className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200 transition-colors"
+                            onClick={() => openModal(product)}
+                            aria-label="Edit product"
+                          >
+                            <FiEdit size={16} />
+                          </button>
+                          <button
+                            className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors"
+                            onClick={() => handleDelete(product._id)} // Use product._id
+                            aria-label="Delete product"
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="py-8 text-center text-gray-500">
+                      You haven't added any products yet. Click "Add New Product" to get started!
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </section>
-        <div className={styles.grid}>
-          <section className={`${styles.card} ${styles.salesDetails}`}>
-             <div className={styles.cardHeader}><h2>Sales Details</h2></div>
-             <table className={styles.productTable}>
-                <thead><tr><th>Date</th><th>Order ID</th><th>Amount</th></tr></thead>
-                <tbody>
-                    <tr><td>2025-07-27</td><td>#12345</td><td>₹1,250.00</td></tr>
-                    <tr><td>2025-07-26</td><td>#12344</td><td>₹850.50</td></tr>
-                    <tr><td>2025-07-25</td><td>#12343</td><td>₹2,300.00</td></tr>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Sales Details Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Sales Details</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border-collapse">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                    <th className="py-3 px-6 text-left">Date</th>
+                    <th className="py-3 px-6 text-left">Order ID</th>
+                    <th className="py-3 px-6 text-left">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-700 text-sm font-light">
+                  {/* Dummy data for now, replace with actual sales data */}
+                  <tr><td className="py-3 px-6 text-left">2025-07-27</td><td className="py-3 px-6 text-left">#12345</td><td className="py-3 px-6 text-left">₹1,250.00</td></tr>
+                  <tr><td className="py-3 px-6 text-left">2025-07-26</td><td className="py-3 px-6 text-left">#12344</td><td className="py-3 px-6 text-left">₹850.50</td></tr>
+                  <tr><td className="py-3 px-6 text-left">2025-07-25</td><td className="py-3 px-6 text-left">#12343</td><td className="py-3 px-6 text-left">₹2,300.00</td></tr>
                 </tbody>
-             </table>
+              </table>
+            </div>
           </section>
-          <section className={`${styles.card} ${styles.analytics}`}>
-            <div className={styles.cardHeader}><h2><FiBarChart2 /> Sales Analytics</h2></div>
-            <div className={styles.chartContainer}>
-              <ResponsiveContainer width="100%" height="100%"><LineChart data={salesData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Legend /><Line type="monotone" dataKey="sales" stroke="#5a8a58" strokeWidth={2} activeDot={{ r: 8 }} /></LineChart></ResponsiveContainer>
+
+          {/* Sales Analytics Section */}
+          <section className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><FiBarChart2 /> Sales Analytics</h2>
+            </div>
+            <div className="h-80 w-full"> {/* Fixed height for chart container */}
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={salesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="name" tickLine={false} axisLine={{ stroke: '#e0e0e0' }} />
+                  <YAxis tickLine={false} axisLine={{ stroke: '#e0e0e0' }} />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="sales" stroke="#5a8a58" strokeWidth={2} activeDot={{ r: 8 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </section>
         </div>
       </main>
+
+      {/* Product Add/Edit Modal */}
       {isModalOpen && <ProductModal product={editingProduct} onClose={closeModal} />}
     </div>
   );
 };
 
+// Product Add/Edit Modal Component
 const ProductModal = ({ product, onClose }) => {
   const { addProduct, editProduct } = useProducts();
   const [formData, setFormData] = useState({
@@ -109,42 +216,93 @@ const ProductModal = ({ product, onClose }) => {
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
+      // For simplicity, using URL.createObjectURL for immediate preview
+      // In a real app, you'd upload this file to cloud storage (e.g., Cloudinary, S3)
+      // and get a persistent URL to save to your database.
       setFormData(prev => ({ ...prev, image: URL.createObjectURL(e.target.files[0]) }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // Made async
     e.preventDefault();
     const finalData = {
         ...formData,
         stock: parseFloat(formData.stock),
         price: parseFloat(formData.price),
     };
-    if (product) {
-      editProduct(product.id, finalData);
-    } else {
-      addProduct(finalData);
+    try {
+        if (product) {
+            await editProduct(product._id, finalData); // Use product._id for edit
+        } else {
+            await addProduct(finalData);
+        }
+        onClose(); // Close modal on success
+    } catch (error) {
+        // Handle error, e.g., display a message to the user
+        console.error("Error saving product:", error);
+        alert(`Failed to save product: ${error.message || 'Unknown error'}`); // Simple alert for now
     }
-    onClose();
   };
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <button className={styles.closeModalBtn} onClick={onClose}><FiX /></button>
-        <h2>{product ? 'Edit Product' : 'Add New Product'}</h2>
-        <form onSubmit={handleSubmit} className={styles.modalForm}>
-          <div className={styles.formRow}>
-             <div className={styles.formGroup}><label>Product Name</label><input type="text" name="name" value={formData.name} onChange={handleChange} required /></div>
-             <div className={styles.formGroup}><label>Company Name</label><input type="text" name="companyName" value={formData.companyName} onChange={handleChange} required /></div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onClick={onClose} aria-label="Close modal">
+          <FiX size={24} />
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">{product ? 'Edit Product' : 'Add New Product'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1">Product Name</label>
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="companyName" className="text-sm font-medium text-gray-700 mb-1">Company Name</label>
+              <input type="text" id="companyName" name="companyName" value={formData.companyName} onChange={handleChange} required
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              />
+            </div>
           </div>
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}><label>Category</label><select name="category" value={formData.category} onChange={handleChange}><option>Vegetables</option><option>Fruits</option><option>Grains</option><option>Dairy</option><option>Herbs & Spices</option><option>Other</option></select></div>
-            <div className={styles.formGroup}><label>Stock (kg)</label><input type="number" name="stock" value={formData.stock} onChange={handleChange} required /></div>
-            <div className={styles.formGroup}><label>Price (₹)</label><input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} required /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex flex-col">
+              <label htmlFor="category" className="text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select id="category" name="category" value={formData.category} onChange={handleChange}
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              >
+                <option>Vegetables</option>
+                <option>Fruits</option>
+                <option>Grains</option>
+                <option>Dairy</option>
+                <option>Herbs & Spices</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="stock" className="text-sm font-medium text-gray-700 mb-1">Stock (kg)</label>
+              <input type="number" id="stock" name="stock" value={formData.stock} onChange={handleChange} required
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+              <input type="number" step="0.01" id="price" name="price" value={formData.price} onChange={handleChange} required
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary-green"
+              />
+            </div>
           </div>
-          <div className={styles.formGroup}><label>Product Image</label><input type="file" accept="image/*" onChange={handleImageChange} />{formData.image && <img src={formData.image} alt="Preview" className={styles.imagePreview}/>}</div>
-          <button type="submit" className={styles.primaryBtn}>Save Product</button>
+          <div className="flex flex-col">
+            <label htmlFor="image" className="text-sm font-medium text-gray-700 mb-1">Product Image</label>
+            <input type="file" id="image" accept="image/*" onChange={handleImageChange}
+              className="border border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-green file:text-white hover:file:bg-green-700"
+            />
+            {formData.image && <img src={formData.image} alt="Preview" className="mt-4 w-32 h-32 object-cover rounded-lg shadow-md"/>}
+          </div>
+          <button type="submit" className="w-full bg-primary-green text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-green focus:ring-opacity-75">
+            Save Product
+          </button>
         </form>
       </div>
     </div>
