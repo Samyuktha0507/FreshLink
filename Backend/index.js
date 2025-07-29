@@ -25,33 +25,33 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     // Check if the origin matches either the URL with or without a trailing slash
-    if (origin === allowedFrontendOrigin || origin === allowedFrontendOrigin + '/') {
+    // Also allow localhost for local development
+    if (origin === allowedFrontendOrigin || origin === allowedFrontendOrigin + '/' || origin.startsWith('http://localhost:')) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: ${origin}`)); // Provide more context
     }
   },
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  credentials: true // Crucial for sending/receiving cookies (if you use them for auth)
 };
 app.use(cors(corsOptions));
 // --- End CORS Configuration ---
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // Body parser for JSON
+app.use(express.urlencoded({ extended: false })); // Body parser for URL-encoded data
 
 // API Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes'));
 app.use('/api/delivery', require('./routes/deliveryRoutes'));
-// Assuming you have this route for products, as per previous discussions
-app.use('/api/products', require('./routes/productRoutes')); 
-
+app.use('/api/products', require('./routes/productRoutes')); // Ensure this route is correctly linked
 
 app.get('/', (req, res) => {
   res.send('🚀 FreshLink Backend Running!');
 });
 
-app.use(errorHandler);
+app.use(errorHandler); // Error handling middleware should be last
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
