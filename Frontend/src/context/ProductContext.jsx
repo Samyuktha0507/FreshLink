@@ -42,7 +42,8 @@ export const ProductProvider = ({ children }) => {
         setProducts(response.data);
       } catch (err) {
         console.error('Error fetching products:', err);
-        setError(err.response?.data?.message || 'Failed to fetch products.');
+        // More robust error message for frontend display
+        setError(err.response?.data?.message || 'Failed to fetch products. Please check network or server.');
         setProducts([]); // Clear products on error
       } finally {
         setLoading(false);
@@ -55,8 +56,13 @@ export const ProductProvider = ({ children }) => {
   const addProduct = async (productData) => {
     setAuthHeader(); // Ensure auth header is set
     try {
+      // Add a default image URL if not provided, to prevent "no image" issues
+      const dataToSend = {
+        ...productData,
+        image: productData.image || `https://placehold.co/300x200/E0E0E0/333333?text=NewProduct`,
+      };
       // Assuming your backend has a route like /api/products for adding products
-      const response = await productApi.post('/api/products', productData);
+      const response = await productApi.post('/api/products', dataToSend);
       setProducts((prev) => [response.data, ...prev]); // Add the new product returned from backend
       return response.data;
     } catch (err) {
@@ -71,7 +77,8 @@ export const ProductProvider = ({ children }) => {
     try {
       // Assuming your backend has a route like /api/products/:id for updating products
       const response = await productApi.put(`/api/products/${productId}`, updatedData);
-      setProducts((prev) => prev.map((p) => (p.id === productId ? response.data : p))); // Update with data from backend
+      // --- CRITICAL CHANGE: Use p._id for comparison ---
+      setProducts((prev) => prev.map((p) => (p._id === productId ? response.data : p))); // Update with data from backend
       return response.data;
     } catch (err) {
       console.error('Error editing product:', err);
@@ -85,7 +92,8 @@ export const ProductProvider = ({ children }) => {
     try {
       // Assuming your backend has a route like /api/products/:id for deleting products
       await productApi.delete(`/api/products/${productId}`);
-      setProducts((prev) => prev.filter((p) => p.id !== productId)); // Remove from local state
+      // --- CRITICAL CHANGE: Use p._id for filtering ---
+      setProducts((prev) => prev.filter((p) => p._id !== productId)); // Remove from local state
     } catch (err) {
       console.error('Error deleting product:', err);
       setError(err.response?.data?.message || 'Failed to delete product.');
@@ -99,7 +107,8 @@ export const ProductProvider = ({ children }) => {
   const updateProductStock = (productId, quantityChange) => {
     setProducts((prev) =>
       prev.map((p) =>
-        p.id === productId ? { ...p, stock: p.stock + quantityChange } : p
+        // --- CRITICAL CHANGE: Use p._id for comparison ---
+        p._id === productId ? { ...p, stock: p.stock + quantityChange } : p
       )
     );
     // TODO: If stock changes need to persist, add an API call here.
@@ -111,5 +120,9 @@ export const ProductProvider = ({ children }) => {
 };
 
 export const useProducts = () => {
-  return useContext(ProductContext);
+  const context = useContext(ProductContext);
+  if (context === undefined) {
+    throw new Error('useProducts must be used within a ProductProvider');
+  }
+  return context;
 };
