@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import styles from './LoginPage.module.css'; // Retained
@@ -10,8 +10,25 @@ const LoginPage = () => {
   const { login, register, user } = useAuth(); // Destructure 'user' from useAuth()
 
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', contact: '' }); // Added contact for registration
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', contact: '' });
   const [error, setError] = useState('');
+
+  // Effect to redirect if user is already logged in and tries to access login page
+  useEffect(() => {
+    if (user) { // If user object exists in AuthContext
+      console.log('LoginPage useEffect: User already logged in, role:', user.role);
+      // Redirect based on current user's role
+      if (user.role === 'vendor') {
+          navigate('/products');
+      } else if (user.role === 'producer') {
+          navigate('/dashboard');
+      } else if (user.role === 'driver') {
+          navigate('/driver-dashboard');
+      } else {
+          navigate('/');
+      }
+    }
+  }, [user, navigate]); // Rerun when user object or navigate function changes
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -24,35 +41,30 @@ const LoginPage = () => {
       if (isLogin) {
         await login(formData.email, formData.password);
       } else {
-        // For registration, use urlRole to set the initial role from the URL
-        // Ensure 'contact' is also passed for registration
-        await register({ ...formData, role: urlRole, contact: formData.contact }); // Pass contact
+        await register({ ...formData, role: urlRole, contact: formData.contact });
       }
 
-      // Use 'user' from AuthContext for redirection AFTER login/register completes
-      // The 'user' object in AuthContext will be updated after successful login/register
-      // with the actual role returned by the backend.
-      // We need to wait for the user state to update in AuthContext.
-      // A small delay or a useEffect in a parent component might be needed for instant redirects.
-      // For now, let's assume `user` is updated synchronously or quickly enough.
-
-      // To ensure user state is updated before redirection,
-      // we can fetch the user from localStorage directly if `user` isn't immediately updated.
-      const loggedInUser = JSON.parse(localStorage.getItem('user'));
+      // After login/register, the `user` object in AuthContext should be updated.
+      // The useEffect above will handle the redirection based on the updated `user` state.
+      // We can also add a fallback direct check here, but the useEffect is more robust.
+      const loggedInUser = JSON.parse(localStorage.getItem('user')); // Direct check from localStorage
 
       if (loggedInUser) {
+          // --- DEBUGGING LOG ADDED HERE ---
+          console.log('LoginPage handleSubmit: Successfully logged in/registered. User role:', loggedInUser.role);
+          // --- END DEBUGGING LOG ---
+
           if (loggedInUser.role === 'vendor') {
-              navigate('/products'); // Redirect to vendor-specific shopping page
+              navigate('/products');
           } else if (loggedInUser.role === 'producer') {
-              navigate('/dashboard'); // Redirect to producer-specific dashboard
+              navigate('/dashboard');
           } else if (loggedInUser.role === 'driver') {
-              navigate('/driver-dashboard'); // Redirect to driver-specific dashboard
+              navigate('/driver-dashboard');
           } else {
-              navigate('/'); // Fallback for any other roles or if role is missing/unexpected
+              navigate('/');
           }
       } else {
-          // This case should ideally not be hit if login/register was successful
-          navigate('/');
+          navigate('/'); // Fallback if user object is somehow not set
       }
 
     } catch (err) {
@@ -61,7 +73,7 @@ const LoginPage = () => {
   };
 
   const pageTitle = isLogin ? 'Login' : 'Sign Up';
-  const roleTitle = urlRole ? urlRole.charAt(0).toUpperCase() + urlRole.slice(1) : 'User'; // Handle case where role is not in URL
+  const roleTitle = urlRole ? urlRole.charAt(0).toUpperCase() + urlRole.slice(1) : 'User';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -95,7 +107,7 @@ const LoginPage = () => {
                   name="contact"
                   placeholder="Contact Number"
                   onChange={handleChange}
-                  required={urlRole === 'driver'} // Make contact required only for drivers/delivery partners
+                  required={urlRole === 'driver'}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
                 />
               </div>
