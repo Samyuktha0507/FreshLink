@@ -6,7 +6,7 @@ const productSchema = mongoose.Schema(
     user: { // Link to the user (producer) who created the product
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User', // Refers to your User model
+      ref: 'User', // Refers to your User model (now userModel)
     },
     name: {
       type: String,
@@ -30,10 +30,22 @@ const productSchema = mongoose.Schema(
       required: [true, 'Please add a price'],
       default: 0,
     },
-    image: {
+    image: { // Field for product image URL
       type: String,
-      default: 'https://placehold.co/300x200/cccccc/333?text=No+Image', // Placeholder image URL
+      default: 'https://placehold.co/300x200/cccccc/333?text=No+Image', // Default placeholder image
     },
+    // Storing location as a GeoJSON Point for geospatial queries
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [80.2707, 13.0827] // Default to Chennai coordinates
+      }
+    }
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
