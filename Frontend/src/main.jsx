@@ -8,22 +8,25 @@ import App from './App.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ProductsPage from './pages/ProductsPage.jsx';
 import CartPage from './pages/CartPage.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx'; // Producer Dashboard
 import DeliveryPartnerPage from './pages/DeliveryPartnerPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import PaymentPage from './pages/PaymentPage.jsx'; // This line causes the error if the file doesn't exist
-import './index.css';
+import PaymentPage from './pages/PaymentPage.jsx';
+import './index.css'; // Retained
+import './App.css'; // Retained
 
 const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
   { path: '/login/:role', element: <LoginPage /> },
-  { path: '/dashboard', element: <DashboardPage /> },
+  { path: '/dashboard', element: <DashboardPage /> }, // Producer Dashboard
   { path: '/delivery-partner', element: <DeliveryPartnerPage /> },
   { path: '/payment', element: <PaymentPage /> },
+  // Add specific routes for driver dashboard if needed, e.g.,
+  // { path: '/driver-dashboard', element: <DriverDashboardPage /> },
   {
-    element: <App />,
+    element: <App />, // App component will render Header and Outlet
     children: [
-      { path: '/products', element: <ProductsPage /> },
+      { path: '/products', element: <ProductsPage /> }, // Vendor shopping page
       { path: '/cart', element: <CartPage /> },
     ],
   },
@@ -31,6 +34,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    {/* AuthProvider, ProductProvider, and CartProvider should wrap the RouterProvider */}
     <AuthProvider>
       <ProductProvider>
         <CartProvider>
