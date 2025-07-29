@@ -2,23 +2,24 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './ProductsPage.module.css'; // Retained
 import { FiSearch, FiFilter, FiShoppingCart, FiCheckCircle, FiPlus, FiMinus } from 'react-icons/fi';
-import { useCart } from '../context/CartContext.jsx';
-import { useProducts } from '../context/ProductContext.jsx';
+import { useCart } from '../context/CartContext.jsx'; // Correct import
+import { useProducts } from '../context/ProductContext.jsx'; // Assuming this context fetches products
 import Chatbot from '../components/Chatbot.jsx';
 
 // Helper component for Add to Cart button and quantity selector
 const AddToCartButton = ({ product, setAddedItem }) => {
+    // --- FIX: Renamed addToCart to addItemToCart and updateQuantity to updateItemQuantity ---
     const { cartItems, addItemToCart, updateItemQuantity } = useCart();
     const itemInCart = cartItems.find(item => item._id === product._id); // Use _id
     const quantity = itemInCart ? itemInCart.quantity : 0;
 
     const handleAddToCart = () => {
-        addItemToCart(product);
+        addItemToCart(product); // Use addItemToCart
         setAddedItem(product);
     };
 
     const handleUpdateQuantity = (newQuantity) => {
-        updateItemQuantity(product._id, newQuantity); // Use _id
+        updateItemQuantity(product._id, newQuantity); // Use updateItemQuantity
     };
 
     if (quantity === 0) {
