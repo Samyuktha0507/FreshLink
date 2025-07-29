@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx'; // Correctly imported
 import styles from './LoginPage.module.css';
 import { FiUser, FiLock, FiMail, FiArrowLeft } from 'react-icons/fi';
 
 const LoginPage = () => {
-  const { role } = useParams();
+  const { role: urlRole } = useParams(); // Renamed to urlRole to avoid conflict
   const navigate = useNavigate();
-  const { login, register } = useAuth();
-  
+  const { login, register, user } = useAuth(); // <-- Destructure 'user' from useAuth()
+
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
@@ -24,21 +24,38 @@ const LoginPage = () => {
       if (isLogin) {
         await login(formData.email, formData.password);
       } else {
-        await register({ ...formData, role });
+        // For registration, still use urlRole to set the initial role from the URL
+        await register({ ...formData, role: urlRole });
       }
 
-      // Redirect after successful login/register
-      if (role === 'vendor') navigate('/products');
-      else if (role === 'producer') navigate('/dashboard');
-      else navigate('/');
+      // --- CRITICAL CHANGE HERE: Use 'user.role' from AuthContext for redirection ---
+      // The 'user' object in AuthContext will be updated after successful login/register
+      // with the actual role returned by the backend.
+      if (user) { // Ensure user object is available
+          if (user.role === 'vendor') {
+              navigate('/products'); // Redirect to vendor-specific dashboard
+          } else if (user.role === 'producer') {
+              navigate('/dashboard'); // Redirect to producer-specific dashboard
+          } else if (user.role === 'driver') { // Assuming 'driver' is your delivery partner role
+              navigate('/driver-dashboard'); // Redirect to driver-specific dashboard
+          } else {
+              // Fallback for any other roles or if role is missing/unexpected
+              navigate('/'); // Or a generic dashboard
+          }
+      } else {
+          // Fallback if user object is somehow not set immediately (though it should be by AuthContext)
+          navigate('/');
+      }
 
     } catch (err) {
+      // Axios errors have response.data.message
       setError(err.response?.data?.message || 'An error occurred. Please try again.');
     }
   };
 
+  // Use urlRole for display purposes
   const pageTitle = isLogin ? 'Login' : 'Sign Up';
-  const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
+  const roleTitle = urlRole.charAt(0).toUpperCase() + urlRole.slice(1);
 
   return (
     <div className={styles.pageContainer}>
