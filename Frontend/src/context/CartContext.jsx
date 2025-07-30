@@ -50,6 +50,7 @@ export const CartProvider = ({ children }) => {
             console.log("CartContext: Updated existing item in cart:", updatedItems); // DEBUG
         } else {
             console.warn(`CartContext: Cannot add more ${product.name}. Max stock reached.`);
+            // Optionally, set an error state or notification here
         }
         return updatedItems;
       } else {
