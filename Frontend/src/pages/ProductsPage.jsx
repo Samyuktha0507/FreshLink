@@ -7,7 +7,9 @@ import { useProducts } from '../context/ProductContext.jsx'; // Assuming this co
 import Chatbot from '../components/Chatbot.jsx';
 
 const AddToCartButton = ({ product, setAddedItem }) => {
+    // --- FIX: Use correct function names from CartContext ---
     const { cartItems, addItemToCart, updateItemQuantity } = useCart();
+    // --- FIX: Use product._id for consistency with MongoDB and CartContext ---
     const itemInCart = cartItems.find(item => item._id === product._id);
     const quantity = itemInCart ? itemInCart.quantity : 0;
 
@@ -21,22 +23,22 @@ const AddToCartButton = ({ product, setAddedItem }) => {
         // --- DEBUG LOG ADDED ---
         console.log(`handleAddToCart: Attempting to add product:`, product);
         // --- END DEBUG LOG ---
-        addItemToCart(product);
-        setAddedItem(product);
+        addItemToCart(product); // Correct function name
+        setAddedItem(product); // Set item for notification
     };
 
     const handleUpdateQuantity = (newQuantity) => {
         // --- DEBUG LOG ADDED ---
         console.log(`handleUpdateQuantity: Product ID: ${product._id}, New Quantity: ${newQuantity}`);
         // --- END DEBUG LOG ---
-        updateItemQuantity(product._id, newQuantity);
+        updateItemQuantity(product._id, newQuantity); // Correct function name and use _id
     };
 
     if (quantity === 0) {
         return (
             <button
                 className={styles.addToCartBtn}
-                onClick={handleAddToCart}
+                onClick={handleAddToCart} // Call the new handler
                 disabled={product.stock <= 0}
             >
                 {product.stock > 0 ? <><FiShoppingCart /> Add to Cart</> : 'Out of Stock'}
@@ -52,6 +54,24 @@ const AddToCartButton = ({ product, setAddedItem }) => {
         </div>
     );
 };
+
+// Notification component for when an item is added to cart
+const AddToCartNotification = ({ item }) => {
+    return (
+        <div className={styles.notification}>
+            <FiCheckCircle className={styles.notificationIcon} />
+            <img
+                src={item.image || `https://placehold.co/50x50/E0E0E0/333333?text=NoImg`}
+                alt={item.name}
+                className={styles.notificationImg}
+                onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/50x50/E0E0E0/333333?text=NoImg`; }}
+            />
+            <div className={styles.notificationText}><strong>Added to Cart</strong><p>{item.name}</p></div>
+            <Link to="/cart" className={styles.notificationBtn}>View Cart</Link>
+        </div>
+    );
+};
+
 
 const ProductsPage = () => {
   const { products: allProducts, loading, error } = useProducts();
