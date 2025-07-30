@@ -1,64 +1,142 @@
-import React, { createContext, useState, useContext } from 'react';
-import { useProducts } from './ProductContext';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useProducts } from './ProductContext'; // Make sure this path is correct
 
-const CartContext = createContext(null);
+// Create the Cart Context
+const CartContext = createContext();
 
+// Cart Provider component to wrap your application
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
-  const { updateProductStock } = useProducts(); // Get the stock update function
+  // Initialize cart state from localStorage or an empty array
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const localCart = localStorage.getItem('cartItems');
+      return localCart ? JSON.parse(localCart) : [];
+    } catch (error) {
+      console.error("Failed to parse cart items from localStorage:", error);
+      return [];
+    }
+  });
 
-  const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        updateProductStock(product.id, -1); // Decrease stock by 1
-        return prevItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+  const { updateProductStock } = useProducts(); // Get the stock update function from ProductContext
+
+  // Effect to save cart items to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (error) {
+      console.error("Failed to save cart items to localStorage:", error);
+    }
+  }, [cartItems]);
+
+  // Function to add an item to the cart
+  // product: { _id, name, price, stock, image, ...otherProductDetails }
+  const addItemToCart = (product, quantity = 1) => {
+    console.log("CartContext: Adding item to cart:", product.name, "Quantity:", quantity);
+    setCartItems(currentItems => {
+      const existingItemIndex = currentItems.findIndex(item => item._id === product._id);
+
+      if (existingItemIndex > -1) {
+        // If item exists, update its quantity
+        const updatedItems = [...currentItems];
+        const newQuantity = updatedItems[existingItemIndex].quantity + quantity;
+        // Prevent adding more than available stock
+        if (newQuantity <= product.stock) {
+            updatedItems[existingItemIndex].quantity = newQuantity;
+            updateProductStock(product._id, -quantity); // Decrease stock by quantity added
+        } else {
+            console.warn(`Cannot add more ${product.name}. Max stock reached.`);
+            // Optionally, set an error state or notification here
+        }
+        return updatedItems;
+      } else {
+        // If item does not exist, add it with quantity, if stock allows
+        if (quantity <= product.stock) {
+            updateProductStock(product._id, -quantity); // Decrease stock by quantity added
+            return [...currentItems, { ...product, quantity }];
+        } else {
+            console.warn(`Cannot add ${product.name}. Not enough stock available.`);
+            // Optionally, set an error state or notification here
+            return currentItems; // Do not add if not enough stock
+        }
       }
-      updateProductStock(product.id, -1); // Decrease stock by 1
-      return [...prevItems, { ...product, quantity: 1 }];
     });
   };
 
-  const updateQuantity = (productId, newQuantity) => {
-    let quantityChange = 0;
-    setCartItems((prevItems) => {
-        const itemToUpdate = prevItems.find(item => item.id === productId);
-        if (itemToUpdate) {
-            quantityChange = newQuantity - itemToUpdate.quantity;
+  // Function to update the quantity of an item
+  const updateItemQuantity = (productId, newQuantity) => {
+    console.log("CartContext: Updating item quantity:", productId, "New quantity:", newQuantity);
+    setCartItems(currentItems => {
+      return currentItems.map(item => {
+        if (item._id === productId) {
+          const quantityDifference = newQuantity - item.quantity;
+          // Only update if new quantity is valid and within stock limits
+          if (newQuantity >= 0 && newQuantity <= item.stock) { // Ensure quantity is non-negative and not exceeding product's original stock
+            updateProductStock(productId, -quantityDifference); // Adjust stock by the difference
+            return { ...item, quantity: newQuantity };
+          } else {
+            console.warn(`Cannot update quantity for ${item.name} to ${newQuantity}. Stock limits apply.`);
+            // Optionally, set an error state or notification here
+            return item; // Return original item if update is invalid
+          }
         }
-        return prevItems
-          .map((item) => (item.id === productId ? { ...item, quantity: Math.max(0, newQuantity) } : item))
-          .filter((item) => item.quantity > 0);
-      }
-    );
-    if(quantityChange !== 0) {
-        updateProductStock(productId, -quantityChange); // Update stock by the difference
-    }
+        return item;
+      }).filter(item => item.quantity > 0); // Remove item if quantity becomes 0
+    });
   };
 
-  const removeFromCart = (productId) => {
-    const itemToRemove = cartItems.find(item => item.id === productId);
-    if (itemToRemove) {
-        updateProductStock(productId, itemToRemove.quantity); // Return all stock to inventory
-    }
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+  // Function to remove an item from the cart
+  const removeItemFromCart = (productId) => {
+    console.log("CartContext: Removing item from cart:", productId);
+    setCartItems(currentItems => {
+      const itemToRemove = currentItems.find(item => item._id === productId);
+      if (itemToRemove) {
+          updateProductStock(productId, itemToRemove.quantity); // Return all stock to inventory
+      }
+      return currentItems.filter(item => item._id !== productId);
+    });
   };
-  
+
+  // Function to clear the entire cart
   const clearCart = () => {
+    console.log("CartContext: Clearing cart.");
     // Return all items' stock before clearing
     cartItems.forEach(item => {
-        updateProductStock(item.id, item.quantity);
+        updateProductStock(item._id, item.quantity);
     });
     setCartItems([]);
   };
 
-  const value = { cartItems, addToCart, updateQuantity, removeFromCart, clearCart };
+  // Calculate total items and total price
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  const getCartTotal = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+  };
+
+  const value = {
+    cartItems,
+    addItemToCart,        // <-- FIXED: Exporting the correctly named function
+    removeItemFromCart,   // <-- FIXED: Exporting the correctly named function
+    updateItemQuantity,   // <-- FIXED: Exporting the correctly named function
+    clearCart,
+    getTotalItems,
+    getCartTotal,
+  };
+
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
 };
 
+// Custom hook to use the Cart Context
 export const useCart = () => {
-  return useContext(CartContext);
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 };
