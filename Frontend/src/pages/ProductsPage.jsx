@@ -6,27 +6,37 @@ import { useCart } from '../context/CartContext.jsx'; // Correct import
 import { useProducts } from '../context/ProductContext.jsx'; // Assuming this context fetches products
 import Chatbot from '../components/Chatbot.jsx';
 
-const AddToCartButton = ({ product, setAddedItem }) => { // Added setAddedItem prop back
-    // --- FIX: Use correct function names from CartContext ---
+const AddToCartButton = ({ product, setAddedItem }) => {
     const { cartItems, addItemToCart, updateItemQuantity } = useCart();
-    // --- FIX: Use product._id for consistency with MongoDB and CartContext ---
     const itemInCart = cartItems.find(item => item._id === product._id);
     const quantity = itemInCart ? itemInCart.quantity : 0;
 
+    // --- DEBUG LOGS ADDED ---
+    console.log(`AddToCartButton: Rendering for product ${product.name} (ID: ${product._id})`);
+    console.log(`AddToCartButton: Item in cart:`, itemInCart);
+    console.log(`AddToCartButton: Current quantity:`, quantity);
+    // --- END DEBUG LOGS ---
+
     const handleAddToCart = () => {
-        addItemToCart(product); // Correct function name
-        setAddedItem(product); // Set item for notification
+        // --- DEBUG LOG ADDED ---
+        console.log(`handleAddToCart: Attempting to add product:`, product);
+        // --- END DEBUG LOG ---
+        addItemToCart(product);
+        setAddedItem(product);
     };
 
     const handleUpdateQuantity = (newQuantity) => {
-        updateItemQuantity(product._id, newQuantity); // Correct function name and use _id
+        // --- DEBUG LOG ADDED ---
+        console.log(`handleUpdateQuantity: Product ID: ${product._id}, New Quantity: ${newQuantity}`);
+        // --- END DEBUG LOG ---
+        updateItemQuantity(product._id, newQuantity);
     };
 
     if (quantity === 0) {
         return (
             <button
                 className={styles.addToCartBtn}
-                onClick={handleAddToCart} // Call the new handler
+                onClick={handleAddToCart}
                 disabled={product.stock <= 0}
             >
                 {product.stock > 0 ? <><FiShoppingCart /> Add to Cart</> : 'Out of Stock'}
@@ -44,11 +54,16 @@ const AddToCartButton = ({ product, setAddedItem }) => { // Added setAddedItem p
 };
 
 const ProductsPage = () => {
-  const { products: allProducts, loading, error } = useProducts(); // Get loading and error from context
+  const { products: allProducts, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('Newest First');
-  const [addedItem, setAddedItem] = useState(null); // State to trigger notification
+  const [addedItem, setAddedItem] = useState(null);
+
+  // --- DEBUG LOG ADDED ---
+  console.log('ProductsPage: allProducts from useProducts:', allProducts);
+  console.log('ProductsPage: loading:', loading, 'error:', error);
+  // --- END DEBUG LOG ---
 
   useEffect(() => {
     if (addedItem) {
@@ -68,13 +83,12 @@ const ProductsPage = () => {
       products = products.filter(p => p.category === activeCategory);
     }
 
-    const sorted = [...products]; // Create a shallow copy to avoid mutating original state
+    const sorted = [...products];
     if (sortBy === 'Price: Low to High') {
       sorted.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'Price: High to Low') {
       sorted.sort((a, b) => b.price - a.price);
     }
-    // 'Newest First' implies default order from backend or by creation date if available
 
     return sorted;
   }, [searchTerm, activeCategory, sortBy, allProducts]);
@@ -128,9 +142,7 @@ const ProductsPage = () => {
         <div className={styles.productGrid}>
           {filteredAndSortedProducts.length > 0 ? (
             filteredAndSortedProducts.map(product => (
-              // --- FIX: Use product._id for the key for consistency with MongoDB ---
               <div key={product._id} className={styles.productCard}>
-                {/* Product Image with robust placeholder */}
                 <img
                   src={product.image || `https://placehold.co/300x200/E0E0E0/333333?text=NoImg`}
                   alt={product.name}
@@ -140,12 +152,11 @@ const ProductsPage = () => {
                 <div className={styles.productDetails}>
                   <span className={styles.companyName}>{product.companyName || 'N/A'}</span>
                   <h3>{product.name}</h3>
-                  <p className={styles.productStock}>{product.description || 'No description available.'}</p> {/* Changed from stock to description for better display */}
+                  <p className={styles.productStock}>{product.description || 'No description available.'}</p>
                   <p className={styles.productPrice}>₹{product.price ? product.price.toFixed(2) : 'N/A'}</p>
                   <p className={styles.productStock}>
                     {product.stock !== undefined ? `${product.stock} kg available` : 'Stock N/A'}
                   </p>
-                  {/* Pass setAddedItem to AddToCartButton */}
                   <AddToCartButton product={product} setAddedItem={setAddedItem} />
                 </div>
               </div>
