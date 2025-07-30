@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import styles from './LoginPage.module.css'; // Retained
@@ -39,9 +39,14 @@ const LoginPage = () => {
     setError('');
     try {
       if (isLogin) {
+        console.log('LoginPage handleSubmit: Attempting login with:', formData.email);
         await login(formData.email, formData.password);
       } else {
-        await register({ ...formData, role: urlRole, contact: formData.contact });
+        // For registration, use urlRole to set the initial role from the URL
+        // Ensure 'contact' is also passed for registration
+        const registrationData = { ...formData, role: urlRole, contact: formData.contact };
+        console.log('LoginPage handleSubmit: Attempting registration with:', registrationData);
+        await register(registrationData);
       }
 
       // After login/register, the `user` object in AuthContext should be updated.
@@ -50,9 +55,8 @@ const LoginPage = () => {
       const loggedInUser = JSON.parse(localStorage.getItem('user')); // Direct check from localStorage
 
       if (loggedInUser) {
-          // --- DEBUGGING LOG ADDED HERE ---
-          console.log('LoginPage handleSubmit: Successfully logged in/registered. User role:', loggedInUser.role);
-          // --- END DEBUGGING LOG ---
+          console.log('LoginPage handleSubmit: Successfully logged in/registered. User object from localStorage:', loggedInUser);
+          console.log('LoginPage handleSubmit: User role for redirection:', loggedInUser.role);
 
           if (loggedInUser.role === 'vendor') {
               navigate('/products');
@@ -61,14 +65,16 @@ const LoginPage = () => {
           } else if (loggedInUser.role === 'driver') {
               navigate('/driver-dashboard');
           } else {
-              navigate('/');
+              navigate('/'); // Fallback if user object is somehow not set
           }
       } else {
+          console.error('LoginPage handleSubmit: User object not found in localStorage after successful operation.');
           navigate('/'); // Fallback if user object is somehow not set
       }
 
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred. Please try again.');
+      console.error('LoginPage handleSubmit: Error during login/registration:', err);
+      setError(err.response?.data?.message || 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -107,7 +113,7 @@ const LoginPage = () => {
                   name="contact"
                   placeholder="Contact Number"
                   onChange={handleChange}
-                  required={urlRole === 'driver'}
+                  required={urlRole === 'driver'} // Make contact required only for drivers/delivery partners
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
                 />
               </div>
