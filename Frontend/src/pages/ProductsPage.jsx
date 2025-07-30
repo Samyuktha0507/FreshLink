@@ -9,16 +9,17 @@ import Chatbot from '../components/Chatbot.jsx';
 const AddToCartButton = ({ product, setAddedItem }) => {
     const cartContext = useCart(); // Get the entire context object
     // --- DEBUG: Check if cartContext is defined and its methods ---
-    console.log('AddToCartButton: cartContext:', cartContext);
+    console.log('AddToCartButton: cartContext (from useCart):', cartContext);
     if (!cartContext) {
         console.error('AddToCartButton: useCart() returned undefined! CartProvider might not be correctly wrapping the component tree.');
-        return <button disabled>Cart Unavailable</button>; // Render a disabled button if context is missing
+        // This button will be disabled if context is not available
+        return <button className={styles.addToCartBtn} disabled>Cart Unavailable</button>;
     }
     const { cartItems, addItemToCart, updateItemQuantity } = cartContext;
 
     // --- DEBUG: Check if functions are defined ---
-    console.log('AddToCartButton: addItemToCart is:', typeof addItemToCart);
-    console.log('AddToCartButton: updateItemQuantity is:', typeof updateItemQuantity);
+    console.log('AddToCartButton: addItemToCart is type:', typeof addItemToCart);
+    console.log('AddToCartButton: updateItemQuantity is type:', typeof updateItemQuantity);
     // --- END DEBUG ---
 
     const itemInCart = cartItems.find(item => item._id === product._id);
@@ -34,7 +35,8 @@ const AddToCartButton = ({ product, setAddedItem }) => {
             addItemToCart(product);
             setAddedItem(product);
         } else {
-            console.error('handleAddToCart: addItemToCart is not a function!');
+            console.error('handleAddToCart: addItemToCart is NOT a function! This is the core problem.');
+            // Optionally, show a user-facing error message
         }
     };
 
@@ -43,7 +45,8 @@ const AddToCartButton = ({ product, setAddedItem }) => {
         if (typeof updateItemQuantity === 'function') { // Defensive check
             updateItemQuantity(product._id, newQuantity);
         } else {
-            console.error('handleUpdateQuantity: updateItemQuantity is not a function!');
+            console.error('handleUpdateQuantity: updateItemQuantity is NOT a function! This is the core problem.');
+            // Optionally, show a user-facing error message
         }
     };
 
