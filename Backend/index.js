@@ -5,8 +5,13 @@ const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 // --- IMPORTANT: Vercel Frontend URL ---
-// Define the base URL without a trailing slash
-const allowedFrontendOrigin = "https://fresh-link-00001.vercel.app";
+// Define the allowed frontend origins as an array
+const allowedFrontendOrigins = [
+  "https://fresh-link-00001.vercel.app",
+  "https://fresh-link-00001.vercel.app/", // Include with trailing slash
+  "https://fresh-link-00001-15buixvpy-samyukthas-projects-e3a77e2d.vercel.app", // <-- ADDED THIS NEW VERCEL DOMAIN
+  "https://fresh-link-00001-15buixvpy-samyukthas-projects-e3a77e2d.vercel.app/" // Include with trailing slash
+];
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   console.error('❌ FATAL ERROR: MONGO_URI or JWT_SECRET is not defined in .env file');
@@ -24,12 +29,12 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // Check if the origin matches either the URL with or without a trailing slash
-    // Also allow localhost for local development
-    if (origin === allowedFrontendOrigin || origin === allowedFrontendOrigin + '/' || origin.startsWith('http://localhost:')) {
+    // Check if the origin is in the allowed list or is a localhost development origin
+    if (allowedFrontendOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
       callback(null, true);
     } else {
-      callback(new Error(`Not allowed by CORS: ${origin}`)); // Provide more context
+      console.log(`CORS Blocked: Origin ${origin} is not allowed.`); // Log for debugging
+      callback(new Error(`Not allowed by CORS: ${origin}`));
     }
   },
   optionsSuccessStatus: 200,
@@ -45,7 +50,7 @@ app.use(express.urlencoded({ extended: false })); // Body parser for URL-encoded
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes'));
 app.use('/api/delivery', require('./routes/deliveryRoutes'));
-app.use('/api/products', require('./routes/productRoutes')); // Ensure this route is correctly linked
+app.use('/api/products', require('./routes/productRoutes'));
 
 app.get('/', (req, res) => {
   res.send('🚀 FreshLink Backend Running!');
