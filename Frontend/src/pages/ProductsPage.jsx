@@ -7,38 +7,51 @@ import { useProducts } from '../context/ProductContext.jsx'; // Assuming this co
 import Chatbot from '../components/Chatbot.jsx';
 
 const AddToCartButton = ({ product, setAddedItem }) => {
-    // --- FIX: Use correct function names from CartContext ---
-    const { cartItems, addItemToCart, updateItemQuantity } = useCart();
-    // --- FIX: Use product._id for consistency with MongoDB and CartContext ---
+    const cartContext = useCart(); // Get the entire context object
+    // --- DEBUG: Check if cartContext is defined and its methods ---
+    console.log('AddToCartButton: cartContext:', cartContext);
+    if (!cartContext) {
+        console.error('AddToCartButton: useCart() returned undefined! CartProvider might not be correctly wrapping the component tree.');
+        return <button disabled>Cart Unavailable</button>; // Render a disabled button if context is missing
+    }
+    const { cartItems, addItemToCart, updateItemQuantity } = cartContext;
+
+    // --- DEBUG: Check if functions are defined ---
+    console.log('AddToCartButton: addItemToCart is:', typeof addItemToCart);
+    console.log('AddToCartButton: updateItemQuantity is:', typeof updateItemQuantity);
+    // --- END DEBUG ---
+
     const itemInCart = cartItems.find(item => item._id === product._id);
     const quantity = itemInCart ? itemInCart.quantity : 0;
 
-    // --- DEBUG LOGS ADDED ---
     console.log(`AddToCartButton: Rendering for product ${product.name} (ID: ${product._id})`);
     console.log(`AddToCartButton: Item in cart:`, itemInCart);
     console.log(`AddToCartButton: Current quantity:`, quantity);
-    // --- END DEBUG LOGS ---
 
     const handleAddToCart = () => {
-        // --- DEBUG LOG ADDED ---
         console.log(`handleAddToCart: Attempting to add product:`, product);
-        // --- END DEBUG LOG ---
-        addItemToCart(product); // Correct function name
-        setAddedItem(product); // Set item for notification
+        if (typeof addItemToCart === 'function') { // Defensive check
+            addItemToCart(product);
+            setAddedItem(product);
+        } else {
+            console.error('handleAddToCart: addItemToCart is not a function!');
+        }
     };
 
     const handleUpdateQuantity = (newQuantity) => {
-        // --- DEBUG LOG ADDED ---
         console.log(`handleUpdateQuantity: Product ID: ${product._id}, New Quantity: ${newQuantity}`);
-        // --- END DEBUG LOG ---
-        updateItemQuantity(product._id, newQuantity); // Correct function name and use _id
+        if (typeof updateItemQuantity === 'function') { // Defensive check
+            updateItemQuantity(product._id, newQuantity);
+        } else {
+            console.error('handleUpdateQuantity: updateItemQuantity is not a function!');
+        }
     };
 
     if (quantity === 0) {
         return (
             <button
                 className={styles.addToCartBtn}
-                onClick={handleAddToCart} // Call the new handler
+                onClick={handleAddToCart}
                 disabled={product.stock <= 0}
             >
                 {product.stock > 0 ? <><FiShoppingCart /> Add to Cart</> : 'Out of Stock'}
@@ -80,10 +93,8 @@ const ProductsPage = () => {
   const [sortBy, setSortBy] = useState('Newest First');
   const [addedItem, setAddedItem] = useState(null);
 
-  // --- DEBUG LOG ADDED ---
   console.log('ProductsPage: allProducts from useProducts:', allProducts);
   console.log('ProductsPage: loading:', loading, 'error:', error);
-  // --- END DEBUG LOG ---
 
   useEffect(() => {
     if (addedItem) {
